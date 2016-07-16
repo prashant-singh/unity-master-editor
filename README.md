@@ -15,7 +15,7 @@
   - **That's it!**
 
 
-  ![JSON Window Screenshot](http://i.imgur.com/tQjoV8G.png) 
+![JSON Window Screenshot](http://i.imgur.com/tQjoV8G.png) 
   
   
 **POST**
