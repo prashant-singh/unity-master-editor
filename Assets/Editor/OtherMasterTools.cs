@@ -41,7 +41,7 @@ public class OtherMasterTools : EditorWindow {
 
 	bool _playerPrefBoolValue;
 	static bool isAutoSaveBeforePlay,isAutoSaveWithinTime;
-
+	string totalAudioSizeString,totalTextureSizeString;
 	void OnGUI()
 	{
 		InitStyles();
@@ -50,16 +50,22 @@ public class OtherMasterTools : EditorWindow {
 		GUILayout.Label("Master Tools version 0.2",normalLabel);
 		GUILayout.Label(" Other Tools ",titleLabel);
 		GUILayout.Space(20);
-		GUILayout.Label("  Total size of Images in project folder ",subtitleLabel);
+		GUILayout.Label("  Total size of media in project folder ",subtitleLabel);
 		GUILayout.BeginHorizontal(styleHelpboxInner);
 		// Get All the 
 		if(GUILayout.Button(" Refresh ",GUILayout.MinWidth(80),GUILayout.MaxWidth(100),GUILayout.MinHeight(30)))
 		{
-			totalSize = 0;
-			GetCompressedFileSize();
+			totalTextureSize = GetCompressedFileSize("textures");
+			audioSize = GetCompressedFileSize("audios");
 		}
-		_allTextureSizeInAsset = GetFormattedSize(totalSize);
-		GUILayout.Label(" Size : "+_allTextureSizeInAsset,normalLabel);
+		//		_allTextureSizeInAsset = "Audio : "+GetFormattedSize(audioSize)+" Texture :"+GetFormattedSize(totalTextureSize);
+
+		GUILayout.BeginVertical();
+		GUILayout.Label(" Audio Files : "+GetFormattedSize(audioSize),normalLabel);
+		GUILayout.Label(" Textures : "+GetFormattedSize(totalTextureSize),normalLabel);
+		GUILayout.EndVertical();
+
+		//		GUILayout.Label(" Size : "+_allTextureSizeInAsset,normalLabel);
 		GUILayout.EndHorizontal();
 		GUILayout.Space(20);
 		GUILayout.Label(" Edit any player prefs ",subtitleLabel);
@@ -67,7 +73,7 @@ public class OtherMasterTools : EditorWindow {
 		GUILayout.BeginHorizontal(styleHelpboxInner);
 
 		_playerPrefsKey = EditorGUILayout.TextField(_playerPrefsKey,GUILayout.MinHeight(20));
-	
+
 		switch (op) {
 		default:
 			_playerPrefsValue = EditorGUILayout.TextField(_playerPrefsValue,GUILayout.MinHeight(20));
@@ -121,19 +127,19 @@ public class OtherMasterTools : EditorWindow {
 		{
 			if(!string.IsNullOrEmpty(_playerPrefsKey))
 			{
-			if(op == OPTIONS.String)
-			{
-				_playerPrefsValue = PlayerPrefs.GetString(_playerPrefsKey,_playerPrefsValue.ToString());
-			}
-			else if(op == OPTIONS.Int)
-			{
-				_playerPrefsIntValue = 	PlayerPrefs.GetInt(_playerPrefsKey,_playerPrefsIntValue);
-			}
-			else if(op == OPTIONS.Float)
-			{
-				_playerPrefsFloatValue =	PlayerPrefs.GetFloat(_playerPrefsKey,_playerPrefsFloatValue);
-			}
-			_playerPrefsNotificationLabel = "Data loaded";
+				if(op == OPTIONS.String)
+				{
+					_playerPrefsValue = PlayerPrefs.GetString(_playerPrefsKey,_playerPrefsValue.ToString());
+				}
+				else if(op == OPTIONS.Int)
+				{
+					_playerPrefsIntValue = 	PlayerPrefs.GetInt(_playerPrefsKey,_playerPrefsIntValue);
+				}
+				else if(op == OPTIONS.Float)
+				{
+					_playerPrefsFloatValue =	PlayerPrefs.GetFloat(_playerPrefsKey,_playerPrefsFloatValue);
+				}
+				_playerPrefsNotificationLabel = "Data loaded";
 			}
 			else
 			{
@@ -145,20 +151,20 @@ public class OtherMasterTools : EditorWindow {
 		{
 			if(!string.IsNullOrEmpty(_playerPrefsKey))
 			{
-			bool option = EditorUtility.DisplayDialog( "Do you really want to Delete "+_playerPrefsKey+ "'s data???",
-				"Gotta confirm it bro!",
-				"I know what I'm doing.",
-				"No bro, I swear I didn't do anything."
-			);			
-			if(option)
-			{
-				PlayerPrefs.DeleteAll();
-				_playerPrefsNotificationLabel = "Deleted current key's data";
-			}
-			else
-			{
-				Debug.LogError(" Na bolta hai sala");
-			}
+				bool option = EditorUtility.DisplayDialog( "Do you really want to Delete "+_playerPrefsKey+ "'s data???",
+					"Gotta confirm it bro!",
+					"I know what I'm doing.",
+					"No bro, I swear I didn't do anything."
+				);			
+				if(option)
+				{
+					PlayerPrefs.DeleteAll();
+					_playerPrefsNotificationLabel = "Deleted current key's data";
+				}
+				else
+				{
+					Debug.LogError(" Na bolta hai sala");
+				}
 			}
 			else
 			{
@@ -170,7 +176,7 @@ public class OtherMasterTools : EditorWindow {
 			bool option = EditorUtility.DisplayDialog( "Do you really want to Delete all the Data ???? ",
 				"Gotta confirm it bro!",
 				"I know what I'm doing.",
-				"Noooooo!"
+				"No bro, I swear I didn't do anything."
 			);			
 			if(option)
 			{
@@ -179,7 +185,7 @@ public class OtherMasterTools : EditorWindow {
 			}
 			else
 			{
-//				Debug.LogError(" Na bolta hai sala");
+				Debug.LogError(" Na bolta hai sala");
 			}
 		}
 
@@ -197,7 +203,7 @@ public class OtherMasterTools : EditorWindow {
 		{
 			EditorPrefs.SetBool("autoSaveOnPlay",isAutoSaveBeforePlay);
 		}
-//		isAutoSaveWithinTime = GUILayout.Toggle(isAutoSaveWithinTime,"Auto save within some time");
+		//		isAutoSaveWithinTime = GUILayout.Toggle(isAutoSaveWithinTime,"Auto save within some time");
 		GUILayout.EndHorizontal();
 
 		GUILayout.EndVertical();
@@ -221,19 +227,19 @@ public class OtherMasterTools : EditorWindow {
 	{
 		titleLabel = new GUIStyle();
 		titleLabel.fontSize = 16;
-		titleLabel.normal.textColor = Color.black;
+		titleLabel.normal.textColor = Color.white;
 		titleLabel.alignment = TextAnchor.UpperCenter;
 		titleLabel.fixedHeight = 18;
 
 		normalLabel = new GUIStyle();
 		normalLabel.fontSize = 12;
-		normalLabel.normal.textColor = Color.black;
+		normalLabel.normal.textColor = Color.white;
 		normalLabel.fixedHeight = 14;
 		normalLabel.alignment = TextAnchor.MiddleRight;
 
 		subtitleLabel = new GUIStyle();
 		subtitleLabel.fontSize = 14;
-		subtitleLabel.normal.textColor = Color.black;
+		subtitleLabel.normal.textColor = Color.white;
 		subtitleLabel.fixedHeight = 15;
 		subtitleLabel.alignment = TextAnchor.MiddleLeft;
 
@@ -243,12 +249,26 @@ public class OtherMasterTools : EditorWindow {
 
 
 
-	static long totalSize = 0;
+	static long totalTextureSize = 0,audioSize = 0;
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++ GET ALL TEXTURE SIZE IN ASSETS FOLDER +++++++++++++++++++++++++++++++++++++++++++++
 
-private static void GetCompressedFileSize()
+
+
+
+	private static long GetCompressedFileSize(string fileExt)
 	{
-		Object[] AllObjects	= Resources.FindObjectsOfTypeAll(typeof(Texture));
+
+		Object[] AllObjects = new Object[]{};
+		switch (fileExt) 
+		{
+		case "textures":
+			AllObjects = Resources.FindObjectsOfTypeAll(typeof(Texture));
+			break;
+		case "audios":
+			AllObjects = Resources.FindObjectsOfTypeAll(typeof(AudioClip));
+			break;
+		}
+		long tempSize = 0;
 		foreach (Object currentObj in AllObjects) 
 		{
 			string tempPath = AssetDatabase.GetAssetPath(currentObj);
@@ -259,13 +279,14 @@ private static void GetCompressedFileSize()
 				if (File.Exists(p))
 				{
 					var file = new FileInfo(p);
-					totalSize += file.Length;
+					tempSize += file.Length;
 				}
 			}
-		}
-//		Debug.LogError("Total Size "+GetFormattedSize(totalSize));
+		}	
+		return tempSize;
+		//		Debug.LogError("Total Size "+GetFormattedSize(totalSize));
 	}
-		
+
 	static string GetFormattedSize(double tempSizeInBytes)
 	{
 		if(tempSizeInBytes>=1024)
@@ -283,7 +304,7 @@ private static void GetCompressedFileSize()
 	}
 
 
-	
+
 
 
 
