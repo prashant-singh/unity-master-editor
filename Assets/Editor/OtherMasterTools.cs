@@ -21,6 +21,7 @@ public class OtherMasterTools : EditorWindow {
 		_playerPrefsValue = "Value";
 		_playerPrefsFloatValue = 0.0f;
 		_playerPrefsIntValue = 0;
+		GetAllAssetDatabaseSize();
 		isAutoSaveBeforePlay = EditorPrefs.GetBool("autoSaveOnPlay",false);
 	}
 
@@ -55,14 +56,15 @@ public class OtherMasterTools : EditorWindow {
 		// Get All the 
 		if(GUILayout.Button(" Refresh ",GUILayout.MinWidth(80),GUILayout.MaxWidth(100),GUILayout.MinHeight(30)))
 		{
-			totalTextureSize = GetCompressedFileSize("textures");
-			audioSize = GetCompressedFileSize("audios");
+			GetAllAssetDatabaseSize();
 		}
 		//		_allTextureSizeInAsset = "Audio : "+GetFormattedSize(audioSize)+" Texture :"+GetFormattedSize(totalTextureSize);
 
 		GUILayout.BeginVertical();
 		GUILayout.Label(" Audio Files : "+GetFormattedSize(audioSize),normalLabel);
 		GUILayout.Label(" Textures : "+GetFormattedSize(totalTextureSize),normalLabel);
+		GUILayout.Label("Total : "+GetFormattedSize(totalAssetsSize),normalLabel);
+
 		GUILayout.EndVertical();
 
 		//		GUILayout.Label(" Size : "+_allTextureSizeInAsset,normalLabel);
@@ -213,6 +215,7 @@ public class OtherMasterTools : EditorWindow {
 		GUILayout.EndVertical();
 	}
 
+
 	static void SaveCurrentScene()
 	{
 		if (!EditorApplication.isPlaying && EditorApplication.isPlayingOrWillChangePlaymode && isAutoSaveBeforePlay)
@@ -221,6 +224,7 @@ public class OtherMasterTools : EditorWindow {
 			EditorApplication.SaveScene();
 		}
 	}
+
 
 
 	void InitStyles()
@@ -249,29 +253,37 @@ public class OtherMasterTools : EditorWindow {
 
 
 
-	static long totalTextureSize = 0,audioSize = 0;
+	static long totalTextureSize = 0,audioSize = 0,totalAssetsSize = 0;
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++ GET ALL TEXTURE SIZE IN ASSETS FOLDER +++++++++++++++++++++++++++++++++++++++++++++
 
 
+	#region Find file sizes
 
+	static void GetAllAssetDatabaseSize()
+	{
+		totalTextureSize = GetCompressedFileSize("textures");
+		audioSize = GetCompressedFileSize("audios");
+		totalAssetsSize = totalTextureSize+audioSize;
+	}
 
 	private static long GetCompressedFileSize(string fileExt)
 	{
 
-		Object[] AllObjects = new Object[]{};
+//		Object[] AllObjects = new Object[]{};
+		string[] allAssetsAddresses = new string[]{};
 		switch (fileExt) 
 		{
 		case "textures":
-			AllObjects = Resources.FindObjectsOfTypeAll(typeof(Texture));
+			allAssetsAddresses =  AssetDatabase.FindAssets("t:texture2D");
 			break;
 		case "audios":
-			AllObjects = Resources.FindObjectsOfTypeAll(typeof(AudioClip));
+			allAssetsAddresses =  AssetDatabase.FindAssets("t:audioclip");
 			break;
 		}
 		long tempSize = 0;
-		foreach (Object currentObj in AllObjects) 
-		{
-			string tempPath = AssetDatabase.GetAssetPath(currentObj);
+
+		foreach (string tempAdd in allAssetsAddresses) {
+			string tempPath = AssetDatabase.GUIDToAssetPath(tempAdd);
 			if (!string.IsNullOrEmpty(tempPath))
 			{
 				string guid = AssetDatabase.AssetPathToGUID(tempPath);
@@ -282,10 +294,13 @@ public class OtherMasterTools : EditorWindow {
 					tempSize += file.Length;
 				}
 			}
-		}	
+		}
 		return tempSize;
-		//		Debug.LogError("Total Size "+GetFormattedSize(totalSize));
 	}
+
+
+	#endregion
+
 
 	static string GetFormattedSize(double tempSizeInBytes)
 	{
@@ -302,8 +317,15 @@ public class OtherMasterTools : EditorWindow {
 			return tempSizeInBytes.ToString()+ "Bytes";
 		}
 	}
+	[MenuItem("Assets/newnewnew")]
+	static void GetDependenciesOfSelectedObject()
+	{
+		Object[] tempObject = Selection.objects;
+		foreach (Object eachObj in tempObject) {
 
-
+			string tempPath = AssetDatabase.GetAssetPath(eachObj);
+		}
+	}
 
 
 
