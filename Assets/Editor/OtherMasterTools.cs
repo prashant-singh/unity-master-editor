@@ -11,6 +11,8 @@ public enum OPTIONS {
 }
 public class OtherMasterTools : EditorWindow {
 	public OPTIONS op;
+	string toolsVersion = "v0.3";
+
 	[MenuItem("[Master_Tools]/Tools")]
 	static void Init() {
 
@@ -48,7 +50,7 @@ public class OtherMasterTools : EditorWindow {
 		InitStyles();
 
 		GUILayout.BeginVertical(styleHelpboxInner);
-		GUILayout.Label("Master Tools version 0.2",normalLabel);
+		GUILayout.Label("Master Tools version "+toolsVersion,normalLabel);
 		GUILayout.Label(" Other Tools ",titleLabel);
 		GUILayout.Space(20);
 		GUILayout.Label("  Total size of media in project folder ",subtitleLabel);
