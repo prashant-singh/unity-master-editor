@@ -304,7 +304,7 @@ public class OtherMasterTools : EditorWindow {
 
 	static string GetFormattedSize(double tempSizeInBytes)
 	{
-		if(tempSizeInBytes>=1024)
+		if(tempSizeInBytes>=1024 && tempSizeInBytes<1048576)
 		{
 			return (tempSizeInBytes/1024).ToString("00") +" Kb";
 		}
