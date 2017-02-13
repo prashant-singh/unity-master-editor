@@ -11,32 +11,34 @@ public enum OPTIONS {
 }
 public class OtherMasterTools : EditorWindow {
 	public OPTIONS op;
-	string toolsVersion = "v0.3";
-
+	static Texture2D scriptIcon,audioIcon;
 	[MenuItem("[Master_Tools]/Tools")]
-	static void Init() {
-
+	static void Init() 
+	{
 		GetWindow(typeof(OtherMasterTools));
-		GetWindow(typeof(OtherMasterTools)).minSize = new Vector2(600,500);
+		GetWindow(typeof(OtherMasterTools)).minSize = new Vector2(600,450);
 		GetWindow(typeof(OtherMasterTools)).titleContent = new GUIContent("Master Tools");
 		_playerPrefsKey = "Key";
 		_playerPrefsValue = "Value";
 		_playerPrefsFloatValue = 0.0f;
 		_playerPrefsIntValue = 0;
-		GetAllAssetDatabaseSize();
 		isAutoSaveBeforePlay = EditorPrefs.GetBool("autoSaveOnPlay",false);
+		scriptIcon = EditorGUIUtility.ObjectContent(null,typeof(Texture)).image as Texture2D;
+		audioIcon = EditorGUIUtility.ObjectContent(null,typeof(AudioClip)).image as Texture2D;
 	}
+
 
 
 	public OtherMasterTools()
 	{
 		EditorApplication.playmodeStateChanged += SaveCurrentScene;
+
 	}
 
 	GUIStyle styleHelpboxInner;
 	GUIStyle titleLabel,normalLabel,subtitleLabel;
-	string _allTextureSizeInAsset = "";
-	static string _playerPrefsKey,_playerPrefsValue;
+	string _allTextureSizeInAsset = "0 Bytes",_allAudioSizeInAsset="0 Bytes";
+	static string _playerPrefsKey="Key",_playerPrefsValue;
 	static float _playerPrefsFloatValue;
 	static int _playerPrefsIntValue;
 
@@ -44,32 +46,46 @@ public class OtherMasterTools : EditorWindow {
 
 	bool _playerPrefBoolValue;
 	static bool isAutoSaveBeforePlay,isAutoSaveWithinTime;
-	string totalAudioSizeString,totalTextureSizeString;
+
 	void OnGUI()
 	{
 		InitStyles();
 
 		GUILayout.BeginVertical(styleHelpboxInner);
-		GUILayout.Label("Master Tools version "+toolsVersion,normalLabel);
+		GUILayout.Label("Master Tools version 0.2",normalLabel);
 		GUILayout.Label(" Other Tools ",titleLabel);
 		GUILayout.Space(20);
-		GUILayout.Label("  Total size of media in project folder ",subtitleLabel);
+		GUILayout.Label("  Total size of Images in project folder ",subtitleLabel);
 		GUILayout.BeginHorizontal(styleHelpboxInner);
-		// Get All the 
-		if(GUILayout.Button(" Refresh ",GUILayout.MinWidth(80),GUILayout.MaxWidth(100),GUILayout.MinHeight(30)))
-		{
-			GetAllAssetDatabaseSize();
-		}
-		//		_allTextureSizeInAsset = "Audio : "+GetFormattedSize(audioSize)+" Texture :"+GetFormattedSize(totalTextureSize);
-
-		GUILayout.BeginVertical();
-		GUILayout.Label(" Audio Files : "+GetFormattedSize(audioSize),normalLabel);
-		GUILayout.Label(" Textures : "+GetFormattedSize(totalTextureSize),normalLabel);
-		GUILayout.Label("Total : "+GetFormattedSize(totalAssetsSize),normalLabel);
-
-		GUILayout.EndVertical();
-
-		//		GUILayout.Label(" Size : "+_allTextureSizeInAsset,normalLabel);
+			// Get All the 
+			if(GUILayout.Button(" Refresh ",GUILayout.MinWidth(80),GUILayout.MaxWidth(100),GUILayout.MinHeight(30)))
+			{
+				totalSize = 0;
+				GetCompressedFileSize("Texture");
+				_allTextureSizeInAsset = GetFormattedSize(totalSize);
+				GetCompressedFileSize("Texture");
+				_allAudioSizeInAsset = GetFormattedSize(totalSize);
+				scriptIcon = EditorGUIUtility.ObjectContent(null,typeof(Texture)).image as Texture2D;
+				audioIcon = EditorGUIUtility.ObjectContent(null,typeof(AudioClip)).image as Texture2D;
+			}
+		GUILayout.Space(200);
+			GUILayout.BeginVertical();
+				GUILayout.BeginHorizontal();
+					GUILayout.FlexibleSpace();
+					GUILayout.Box(scriptIcon,GUILayout.MinWidth(30),GUILayout.MinHeight(30));
+					GUILayout.Label(" : "+_allTextureSizeInAsset,normalLabel);
+					GUILayout.FlexibleSpace();
+					GUILayout.EndHorizontal();
+					GUILayout.Space(10);
+					GUILayout.BeginHorizontal();
+					GUILayout.FlexibleSpace();
+					GUILayout.Box(audioIcon,GUILayout.MinWidth(30),GUILayout.MinHeight(30));
+					GUILayout.Label(" : "+_allAudioSizeInAsset,normalLabel);
+					GUILayout.FlexibleSpace();
+				GUILayout.EndHorizontal();
+					GUILayout.FlexibleSpace();
+		GUILayout.Space(10);
+			GUILayout.EndVertical();
 		GUILayout.EndHorizontal();
 		GUILayout.Space(20);
 		GUILayout.Label(" Edit any player prefs ",subtitleLabel);
@@ -77,7 +93,7 @@ public class OtherMasterTools : EditorWindow {
 		GUILayout.BeginHorizontal(styleHelpboxInner);
 
 		_playerPrefsKey = EditorGUILayout.TextField(_playerPrefsKey,GUILayout.MinHeight(20));
-
+	
 		switch (op) {
 		default:
 			_playerPrefsValue = EditorGUILayout.TextField(_playerPrefsValue,GUILayout.MinHeight(20));
@@ -131,19 +147,19 @@ public class OtherMasterTools : EditorWindow {
 		{
 			if(!string.IsNullOrEmpty(_playerPrefsKey))
 			{
-				if(op == OPTIONS.String)
-				{
-					_playerPrefsValue = PlayerPrefs.GetString(_playerPrefsKey,_playerPrefsValue.ToString());
-				}
-				else if(op == OPTIONS.Int)
-				{
-					_playerPrefsIntValue = 	PlayerPrefs.GetInt(_playerPrefsKey,_playerPrefsIntValue);
-				}
-				else if(op == OPTIONS.Float)
-				{
-					_playerPrefsFloatValue =	PlayerPrefs.GetFloat(_playerPrefsKey,_playerPrefsFloatValue);
-				}
-				_playerPrefsNotificationLabel = "Data loaded";
+			if(op == OPTIONS.String)
+			{
+				_playerPrefsValue = PlayerPrefs.GetString(_playerPrefsKey,_playerPrefsValue.ToString());
+			}
+			else if(op == OPTIONS.Int)
+			{
+				_playerPrefsIntValue = 	PlayerPrefs.GetInt(_playerPrefsKey,_playerPrefsIntValue);
+			}
+			else if(op == OPTIONS.Float)
+			{
+				_playerPrefsFloatValue =	PlayerPrefs.GetFloat(_playerPrefsKey,_playerPrefsFloatValue);
+			}
+			_playerPrefsNotificationLabel = "Data loaded";
 			}
 			else
 			{
@@ -155,20 +171,16 @@ public class OtherMasterTools : EditorWindow {
 		{
 			if(!string.IsNullOrEmpty(_playerPrefsKey))
 			{
-				bool option = EditorUtility.DisplayDialog( "Do you really want to Delete "+_playerPrefsKey+ "'s data???",
-					"Gotta confirm it bro!",
-					"I know what I'm doing.",
-					"No bro, I swear I didn't do anything."
-				);			
-				if(option)
-				{
-					PlayerPrefs.DeleteAll();
-					_playerPrefsNotificationLabel = "Deleted current key's data";
-				}
-				else
-				{
-					Debug.LogError(" Na bolta hai sala");
-				}
+			bool option = EditorUtility.DisplayDialog( "Do you really want to Delete "+_playerPrefsKey+ "'s data???",
+				"Gotta confirm it bro!",
+				"I know what I'm doing.",
+				"No bro, I swear I didn't do anything."
+			);			
+			if(option)
+			{
+				PlayerPrefs.DeleteAll();
+				_playerPrefsNotificationLabel = "Deleted current key's data";
+			}
 			}
 			else
 			{
@@ -180,7 +192,7 @@ public class OtherMasterTools : EditorWindow {
 			bool option = EditorUtility.DisplayDialog( "Do you really want to Delete all the Data ???? ",
 				"Gotta confirm it bro!",
 				"I know what I'm doing.",
-				"No bro, I swear I didn't do anything."
+				"Noooooo!"
 			);			
 			if(option)
 			{
@@ -189,7 +201,7 @@ public class OtherMasterTools : EditorWindow {
 			}
 			else
 			{
-				Debug.LogError(" Na bolta hai sala");
+//				Debug.LogError(" Na bolta hai sala");
 			}
 		}
 
@@ -207,16 +219,11 @@ public class OtherMasterTools : EditorWindow {
 		{
 			EditorPrefs.SetBool("autoSaveOnPlay",isAutoSaveBeforePlay);
 		}
-		//		isAutoSaveWithinTime = GUILayout.Toggle(isAutoSaveWithinTime,"Auto save within some time");
+//		isAutoSaveWithinTime = GUILayout.Toggle(isAutoSaveWithinTime,"Auto save within some time");
 		GUILayout.EndHorizontal();
-
 		GUILayout.EndVertical();
-
-
-
 		GUILayout.EndVertical();
 	}
-
 
 	static void SaveCurrentScene()
 	{
@@ -228,11 +235,11 @@ public class OtherMasterTools : EditorWindow {
 	}
 
 
-
 	void InitStyles()
 	{
 		titleLabel = new GUIStyle();
 		titleLabel.fontSize = 16;
+		titleLabel.fontStyle = FontStyle.Bold;
 		titleLabel.normal.textColor = Color.white;
 		titleLabel.alignment = TextAnchor.UpperCenter;
 		titleLabel.fixedHeight = 18;
@@ -240,11 +247,12 @@ public class OtherMasterTools : EditorWindow {
 		normalLabel = new GUIStyle();
 		normalLabel.fontSize = 12;
 		normalLabel.normal.textColor = Color.white;
-		normalLabel.fixedHeight = 14;
-		normalLabel.alignment = TextAnchor.MiddleRight;
+		normalLabel.fixedHeight = 34;
+		normalLabel.alignment = TextAnchor.MiddleCenter;
 
 		subtitleLabel = new GUIStyle();
 		subtitleLabel.fontSize = 14;
+		titleLabel.fontStyle = FontStyle.Bold;
 		subtitleLabel.normal.textColor = Color.white;
 		subtitleLabel.fixedHeight = 15;
 		subtitleLabel.alignment = TextAnchor.MiddleLeft;
@@ -253,39 +261,25 @@ public class OtherMasterTools : EditorWindow {
 		styleHelpboxInner.padding = new RectOffset(6, 6, 6, 6);
 	}
 
-
-
-	static long totalTextureSize = 0,audioSize = 0,totalAssetsSize = 0;
+	static long totalSize = 0;
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++ GET ALL TEXTURE SIZE IN ASSETS FOLDER +++++++++++++++++++++++++++++++++++++++++++++
 
-
-	#region Find file sizes
-
-	static void GetAllAssetDatabaseSize()
-	{
-		totalTextureSize = GetCompressedFileSize("textures");
-		audioSize = GetCompressedFileSize("audios");
-		totalAssetsSize = totalTextureSize+audioSize;
-	}
-
-	private static long GetCompressedFileSize(string fileExt)
+	private static void GetCompressedFileSize(string fileType)
 	{
 
-//		Object[] AllObjects = new Object[]{};
-		string[] allAssetsAddresses = new string[]{};
-		switch (fileExt) 
+		Object[] AllObjects;
+		if(fileType.Equals("Audio"))
 		{
-		case "textures":
-			allAssetsAddresses =  AssetDatabase.FindAssets("t:texture2D");
-			break;
-		case "audios":
-			allAssetsAddresses =  AssetDatabase.FindAssets("t:audioclip");
-			break;
+			AllObjects	= Resources.FindObjectsOfTypeAll(typeof(AudioClip));
 		}
-		long tempSize = 0;
-
-		foreach (string tempAdd in allAssetsAddresses) {
-			string tempPath = AssetDatabase.GUIDToAssetPath(tempAdd);
+		else
+		{
+			AllObjects	= Resources.FindObjectsOfTypeAll(typeof(Texture));
+		}
+		
+		foreach (Object currentObj in AllObjects) 
+		{
+			string tempPath = AssetDatabase.GetAssetPath(currentObj);
 			if (!string.IsNullOrEmpty(tempPath))
 			{
 				string guid = AssetDatabase.AssetPathToGUID(tempPath);
@@ -293,42 +287,31 @@ public class OtherMasterTools : EditorWindow {
 				if (File.Exists(p))
 				{
 					var file = new FileInfo(p);
-					tempSize += file.Length;
+					totalSize += file.Length;
 				}
 			}
 		}
-		return tempSize;
+//		Debug.LogError("Total Size "+GetFormattedSize(totalSize));
 	}
-
-
-	#endregion
-
-
+		
 	static string GetFormattedSize(double tempSizeInBytes)
 	{
 		if(tempSizeInBytes>=1024 && tempSizeInBytes<1048576)
 		{
-			return (tempSizeInBytes/1024).ToString("00") +" Kb";
+			return (tempSizeInBytes/1024).ToString("00.##") +" Kb";
 		}
 		if(tempSizeInBytes>=1048576)
 		{
-			return ((tempSizeInBytes/1024)/1024).ToString("00") + " Mb";
+			return ((tempSizeInBytes/1024)/1024).ToString("00.##") + " Mb";
 		}
 		else
 		{
-			return tempSizeInBytes.ToString()+ "Bytes";
-		}
-	}
-	[MenuItem("Assets/newnewnew")]
-	static void GetDependenciesOfSelectedObject()
-	{
-		Object[] tempObject = Selection.objects;
-		foreach (Object eachObj in tempObject) {
-
-			string tempPath = AssetDatabase.GetAssetPath(eachObj);
+			return tempSizeInBytes.ToString()+ " Bytes";
 		}
 	}
 
+
+	
 
 
 
